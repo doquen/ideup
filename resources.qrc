@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>play.png</file>
+        <file>playsel.png</file>
+        <file>save.png</file>
+    </qresource>
+</RCC>
