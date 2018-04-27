@@ -15,6 +15,7 @@ public:
     void setFilePath(QString filePath);
     QString getFilePath();
     void saveFile(QString path);
+    bool is_host_file();
 
 private:
     QString mFilePath;

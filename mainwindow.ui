@@ -40,6 +40,7 @@
    <addaction name="actionEjecutar"/>
    <addaction name="actionEjecutar_Resaltado"/>
    <addaction name="actionGuardar"/>
+   <addaction name="actionTransferir"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QDockWidget" name="dockWidget_5">
@@ -94,6 +95,15 @@
    </property>
    <property name="shortcut">
     <string>F5</string>
+   </property>
+  </action>
+  <action name="actionTransferir">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/transfer.png</normaloff>:/transfer.png</iconset>
+   </property>
+   <property name="text">
+    <string>Transferir</string>
    </property>
   </action>
  </widget>

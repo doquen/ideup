@@ -16,6 +16,7 @@ Terminal::Terminal(QWidget *parent) :
     port = new QSerialPort();
     toConsole = true;
     targetCurrentDir = "/";
+    readDelay = 20;
 }
 
 Terminal::~Terminal()
@@ -71,7 +72,7 @@ void Terminal::readData()
         do{
             data.append(port->readAll());
             QCoreApplication::processEvents();
-        }while(port->waitForReadyRead(20));
+        }while(port->waitForReadyRead(readDelay));
         if(toConsole)
             ui->textEdit->putData(data);
         else{
@@ -243,6 +244,11 @@ void Terminal::openTargetFile(QString file){
 void Terminal::saveTargetFile(QString path, QByteArray content){
     QByteArray data;
     toConsole = false;
+    readDelay=175;
+    qDebug()<<content;
+    content.replace(QChar('\n'),"\\n");
+    content.replace('\r',"");
+    content.replace("'","\\'");
     data.clear();
     data.append(0x05);
     data.append("IDEUPfile = open('"+path+"','w')\n");
@@ -253,4 +259,22 @@ void Terminal::saveTargetFile(QString path, QByteArray content){
     while (!toConsole) {
         QCoreApplication::processEvents();
     }
+    qDebug()<<internalData;
+    readDelay = 20;
+}
+
+void Terminal::transferFileToTarget(QString fileName, QByteArray content){
+    QByteArray data;
+    toConsole = false;
+    data.clear();
+    data.append(0x05);
+    data.append("IDEUPfile = open('"+fileName+"','w')\n");
+    data.append("IDEUPfile.write('"+content+"')\n");
+    data.append("IDEUPfile.close()\n");
+    data.append(0x04);
+    writeData(data);
+    while (!toConsole) {
+        QCoreApplication::processEvents();
+    }
+    qDebug()<<internalData;
 }

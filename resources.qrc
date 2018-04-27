@@ -3,5 +3,6 @@
         <file>play.png</file>
         <file>playsel.png</file>
         <file>save.png</file>
+        <file>transfer.png</file>
     </qresource>
 </RCC>

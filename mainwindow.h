@@ -28,6 +28,9 @@ private slots:
 
     void on_actionEjecutar_triggered();
 
+    void on_actionTransferir_triggered();
+signals:
+    void transferFile(QString filename, QByteArray content);
 private:
     Ui::MainWindow *ui;
     Editor *ed;

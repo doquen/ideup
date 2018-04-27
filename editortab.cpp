@@ -56,7 +56,7 @@ void EditorTab::saveFile(QString path){
         mFile->write(ed->text().toLatin1());
         mFile->close();
     }else{
-        saveTargetFile(mFilePath,ed->text().toLatin1());
+        saveTargetFile(mFilePath,ed->text().toLocal8Bit());
     }
 }
 EditorTab::~EditorTab(){
@@ -68,4 +68,8 @@ void EditorTab::setFilePath(QString filePath){
 
 QString EditorTab::getFilePath(){
     return mFilePath;
+}
+
+bool EditorTab::is_host_file(){
+    return hostfile;
 }

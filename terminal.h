@@ -28,6 +28,7 @@ public slots:
     void writeData(const QByteArray &data);
     void chdir(QString dir);
     void saveTargetFile(QString path, QByteArray content);
+    void transferFileToTarget(QString fileName, QByteArray content);
     QString pwd();
 private slots:
     void on_pushButton_clicked();
@@ -40,6 +41,7 @@ private slots:
 
 private:
     QSerialPort *port;
+    int readDelay;
     Ui::Terminal *ui;
     QMutex mutex;
     bool toConsole;

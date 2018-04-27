@@ -41,6 +41,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(targ,SIGNAL(openFile(QString)),term,SLOT(openTargetFile(QString)));
     connect(term,SIGNAL(targetFileOpened(QString,QString)),ed,SLOT(openTargetFile(QString,QString)));
     connect(ed,SIGNAL(saveTargetFile(QString,QByteArray)),term,SLOT(saveTargetFile(QString,QByteArray)));
+    connect(this,SIGNAL(transferFile(QString,QByteArray)),term,SLOT(transferFileToTarget(QString,QByteArray)));
 }
 
 MainWindow::~MainWindow()
@@ -72,7 +73,7 @@ void MainWindow::port_connected(QString portName, bool state){
 void MainWindow::on_actionGuardar_triggered()
 {
     EditorTab *et= ed->getCurrentTab();
-    et->saveFile(et->getFilePath());
+    et->saveFile(QDir::cleanPath(et->getFilePath()));
 }
 
 void MainWindow::on_actionEjecutar_triggered()
@@ -83,4 +84,19 @@ void MainWindow::on_actionEjecutar_triggered()
     data.append(et->ed->text().toLatin1());
     data.append(0x04);
     term->writeData(data);
+}
+
+void MainWindow::on_actionTransferir_triggered()
+{
+    EditorTab *et = ed->getCurrentTab();
+    QString fileName = et->getFilePath().split('/').last();
+
+    if (et->is_host_file()){
+        transferFile(fileName,et->ed->text().toLatin1());
+    }else{
+        QFile f(fileName);
+        f.open(QIODevice::WriteOnly);
+        f.write(et->ed->text().toLatin1());
+        f.close();
+    }
 }

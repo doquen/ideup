@@ -25,7 +25,7 @@ int Editor::addTab(QWidget *widget, QString string){
 void Editor::openFile(QString filePath){
     addTab(new EditorTab(filePath),filePath);
     EditorTab* et = (EditorTab*)(ui->tabWidget->currentWidget());
-    connect(et,SIGNAL(saveTargetFile(QString,QByteArray)),this,SLOT(saveTargetFile(QString,QByteArray)));
+    connect(et,SIGNAL(saveTargetFile(QString,QByteArray)),this,SIGNAL(saveTargetFile(QString,QByteArray)));
 }
 
 void Editor::openTargetFile(QString filePath, QString content){
