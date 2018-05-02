@@ -29,6 +29,8 @@ private slots:
     void on_actionEjecutar_triggered();
 
     void on_actionTransferir_triggered();
+    void on_actionGuardar_Como_triggered();
+
 signals:
     void transferFile(QString filename, QByteArray content);
 private:

@@ -24,12 +24,17 @@ private slots:
 
     void on_comboBox_activated(const QString &arg1);
 
+    void on_pushButton_clicked();
+
+    void on_pushButton_2_clicked();
+
 private:
     Ui::HostFileSystem *ui;
     QFileSystemModel *model;
 
 protected:
     void contextMenuEvent(QContextMenuEvent *e) Q_DECL_OVERRIDE;
+    void keyPressEvent(QKeyEvent *e) Q_DECL_OVERRIDE;
 };
 
 #endif // HOSTFILESYSTEM_H

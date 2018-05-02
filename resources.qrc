@@ -4,5 +4,9 @@
         <file>playsel.png</file>
         <file>save.png</file>
         <file>transfer.png</file>
+        <file>newfile.png</file>
+        <file>saveas.png</file>
+        <file>newfolder.png</file>
+        <file>transfer2.png</file>
     </qresource>
 </RCC>

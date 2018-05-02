@@ -19,6 +19,10 @@ public:
 signals:
     void currentDirChanged(QString newPath);
     void openFile(QString file);
+    void createNewTargetFile(QString name, QByteArray content);
+    void createNewTargetDir(QString name);
+    void deleteTargetFile(QString name);
+    void deleteTargetDir(QString name);
 
 public slots:
     void addFiles(QStringList items, QStringList icons);
@@ -29,9 +33,15 @@ private slots:
 
     void on_comboBox_activated(const QString &arg1);
 
+    void on_pushButton_clicked();
+
+    void on_pushButton_2_clicked();
+
 private:
     Ui::TargetFileSystem *ui;
     QString currentPath;
+protected:
+    void keyPressEvent(QKeyEvent *e) Q_DECL_OVERRIDE;
 };
 
 #endif // TARGETFILESYSTEM_H

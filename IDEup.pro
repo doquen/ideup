@@ -30,7 +30,8 @@ SOURCES += \
     terminal.cpp \
     console.cpp \
     hostfilesystem.cpp \
-    targetfilesystem.cpp
+    targetfilesystem.cpp \
+    simplefiledialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -39,14 +40,16 @@ HEADERS += \
     terminal.h \
     console.h \
     hostfilesystem.h \
-    targetfilesystem.h
+    targetfilesystem.h \
+    simplefiledialog.h
 
 FORMS += \
         mainwindow.ui \
     editor.ui \
     terminal.ui \
     hostfilesystem.ui \
-    targetfilesystem.ui
+    targetfilesystem.ui \
+    simplefiledialog.ui
 
 RESOURCES += \
     resources.qrc

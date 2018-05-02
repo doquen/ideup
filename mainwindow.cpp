@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-
+#include "simplefiledialog.h"
 #include <QDebug>
 
 
@@ -41,7 +41,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(targ,SIGNAL(openFile(QString)),term,SLOT(openTargetFile(QString)));
     connect(term,SIGNAL(targetFileOpened(QString,QString)),ed,SLOT(openTargetFile(QString,QString)));
     connect(ed,SIGNAL(saveTargetFile(QString,QByteArray)),term,SLOT(saveTargetFile(QString,QByteArray)));
-    connect(this,SIGNAL(transferFile(QString,QByteArray)),term,SLOT(transferFileToTarget(QString,QByteArray)));
+    connect(this,SIGNAL(transferFile(QString,QByteArray)),term,SLOT(saveTargetFile(QString,QByteArray)));
+    connect(targ,SIGNAL(createNewTargetFile(QString,QByteArray)),term,SLOT(saveTargetFile(QString,QByteArray)));
+    connect(targ,SIGNAL(createNewTargetDir(QString)),term,SLOT(createTargetDir(QString)));
+    connect(targ,SIGNAL(deleteTargetDir(QString)),term,SLOT(deleteTargetDir(QString)));
+    connect(targ,SIGNAL(deleteTargetFile(QString)),term,SLOT(deleteTargetFile(QString)));
 }
 
 MainWindow::~MainWindow()
@@ -98,5 +102,19 @@ void MainWindow::on_actionTransferir_triggered()
         f.open(QIODevice::WriteOnly);
         f.write(et->ed->text().toLatin1());
         f.close();
+    }
+}
+
+void MainWindow::on_actionGuardar_Como_triggered()
+{
+    QString fileName;
+    EditorTab *et = ed->getCurrentTab();
+    SimpleFileDialog sfd(&fileName,"Guardar Como",true);
+    if(sfd.exec()){
+        et->set_host_file(sfd.host_selected());
+        if (sfd.host_selected())
+            et->saveFile(fileName);
+        else
+            et->saveFile(term->get_target_current_dir()+"/"+fileName);
     }
 }

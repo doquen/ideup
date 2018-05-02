@@ -17,6 +17,7 @@ class Terminal : public QWidget
 public:
     explicit Terminal(QWidget *parent = 0);
     ~Terminal();
+    QString get_target_current_dir();
 signals:
     void connected(QString portName, bool state = false);
     void sendScannedTargetFiles(QStringList items, QStringList icons);
@@ -28,7 +29,10 @@ public slots:
     void writeData(const QByteArray &data);
     void chdir(QString dir);
     void saveTargetFile(QString path, QByteArray content);
+    void createTargetDir(QString path);
     void transferFileToTarget(QString fileName, QByteArray content);
+    void deleteTargetFile(QString fileName);
+    void deleteTargetDir(QString dirName);
     QString pwd();
 private slots:
     void on_pushButton_clicked();
@@ -46,6 +50,7 @@ private:
     QMutex mutex;
     bool toConsole;
     QByteArray internalData;
+    QByteArray auxInternalData;
     QFileSystemModel *tfs;
     QString targetCurrentDir;
 };

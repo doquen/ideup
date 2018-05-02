@@ -72,11 +72,13 @@ void Terminal::readData()
         do{
             data.append(port->readAll());
             QCoreApplication::processEvents();
-        }while(port->waitForReadyRead(readDelay));
+        }while(port->waitForReadyRead(10));
         if(toConsole)
             ui->textEdit->putData(data);
         else{
+            if(data.endsWith("EOIDEupC\r\n>>> ")){
             toConsole = true;
+            }
             internalData = data;
         }
     }
@@ -116,6 +118,7 @@ void Terminal::scanTargetFileSystem(){
     data.append("\t\tIDEUPdirsicons.append('dir')\n");
     data.append("\telse:\n");
     data.append("\t\tIDEUPdirsicons.append('file')\n");
+    data.append("print('EOIDEupC')");
     data.append(0x04);
     writeData(data);
     while (!toConsole) {
@@ -125,7 +128,8 @@ void Terminal::scanTargetFileSystem(){
     toConsole = false;
     data.clear();
     data.append(0x05);
-    data.append("print(IDEUPdirsicons)");
+    data.append("print(IDEUPdirsicons)\n");
+    data.append("print('EOIDEupC')");
     data.append(0x04);
     writeData(data);
     while (!toConsole) {
@@ -156,6 +160,7 @@ void Terminal::scanTargetFileSystem(){
     data.append(0x05);
     data.append("del IDEUPdirs\n");
     data.append("del IDEUPdirsicons\n");
+    data.append("print('EOIDEupC')");
     data.append(0x04);
     writeData(data);
     while (!toConsole) {
@@ -176,7 +181,8 @@ void Terminal::chdir(QString dir){
     data.clear();
     data.append(0x05);
     data.append("import os\n");
-    data.append("os.chdir('"+dir+"')");
+    data.append("os.chdir('"+dir+"')\n");
+    data.append("print('EOIDEupC')");
     data.append(0x04);
     writeData(data);
     while (!toConsole) {
@@ -190,13 +196,19 @@ QString Terminal::pwd(){
     data.clear();
     data.append(0x05);
     data.append("import os\n");
-    data.append("print('['+os.getcwd()+']')");
+    data.append("IDEupCurrentDir = '['+ os.getcwd() +']'\n");
+    data.append("print('EOIDEupC')");
+    data.append(0x04);
     writeData(data);
     while (!toConsole) {
         QCoreApplication::processEvents();
     }
     toConsole=false;
     data.clear();
+    data.append(0x05);
+    data.append("print(IDEupCurrentDir)\n");
+    data.append("del IDEupCurrentDir\n");
+    data.append("print('EOIDEupC')");
     data.append(0x04);
     writeData(data);
     while (!toConsole) {
@@ -211,29 +223,39 @@ void Terminal::openTargetFile(QString file){
     toConsole = false;
     data.clear();
     data.append(0x05);
+    data.append("import os\n");
     data.append("IDEUPfile = open('"+file+"','r')\n");
     data.append("IDEUPcontent = IDEUPfile.read()\n");
     data.append("IDEUPfile.close()\n");
-    data.append("print(IDEUPcontent)");
+    data.append("IDEupReadFileCommand = 'SOIDEupF'+IDEUPcontent+'EOIDEupF'\n");
+    data.append("print('EOIDEupC')");
+    data.append(0x04);
     writeData(data);
     while (!toConsole) {
         QCoreApplication::processEvents();
     }
     toConsole=false;
     data.clear();
+    data.append(0x05);
+    data.append("print(IDEupReadFileCommand)\n");
+    data.append("print('EOIDEupC')");
     data.append(0x04);
     writeData(data);
     while (!toConsole) {
         QCoreApplication::processEvents();
     }
-    internalData.remove(internalData.indexOf("\r\n"),2);
-    internalData.remove(internalData.indexOf("\r\n>>>"),5);
+    qDebug() << internalData.indexOf("SOIDEupF");
+    qDebug() << internalData.indexOf("EOIDEupF");
+    internalData = internalData.mid(internalData.indexOf("SOIDEupF")+8,internalData.indexOf("EOIDEupF")-internalData.indexOf("SOIDEupF")-8);
+   // internalData.remove(internalData.indexOf("\r\n"),2);
+   // internalData.remove(internalData.indexOf("\r\n>>>"),5);
     targetFileOpened(QDir::cleanPath(targetCurrentDir+"/"+file),internalData);
     toConsole=false;
     data.clear();
     data.append(0x05);
     data.append("del IDEUPfile\n");
     data.append("del IDEUPcontent\n");
+    data.append("print('EOIDEupC')");
     data.append(0x04);
     writeData(data);
     while (!toConsole) {
@@ -244,23 +266,44 @@ void Terminal::openTargetFile(QString file){
 void Terminal::saveTargetFile(QString path, QByteArray content){
     QByteArray data;
     toConsole = false;
-    readDelay=175;
+    readDelay=1000;
     qDebug()<<content;
     content.replace(QChar('\n'),"\\n");
     content.replace('\r',"");
     content.replace("'","\\'");
     data.clear();
     data.append(0x05);
+    data.append("import os\n");
     data.append("IDEUPfile = open('"+path+"','w')\n");
     data.append("IDEUPfile.write('"+content+"')\n");
     data.append("IDEUPfile.close()\n");
+    data.append("print('EOIDEupC')");
     data.append(0x04);
     writeData(data);
     while (!toConsole) {
         QCoreApplication::processEvents();
     }
-    qDebug()<<internalData;
+
     readDelay = 20;
+    scanTargetFileSystem();
+}
+
+void Terminal::createTargetDir(QString path){
+    QByteArray data;
+    toConsole = false;
+    readDelay=175;
+    data.clear();
+    data.append(0x05);
+    data.append("import os\n");
+    data.append("os.mkdir('"+path+"')\n");
+    data.append("print('EOIDEupC')");
+    data.append(0x04);
+    writeData(data);
+    while (!toConsole) {
+        QCoreApplication::processEvents();
+    }
+    readDelay = 20;
+    scanTargetFileSystem();
 }
 
 void Terminal::transferFileToTarget(QString fileName, QByteArray content){
@@ -268,13 +311,49 @@ void Terminal::transferFileToTarget(QString fileName, QByteArray content){
     toConsole = false;
     data.clear();
     data.append(0x05);
+    data.append("import os\n");
     data.append("IDEUPfile = open('"+fileName+"','w')\n");
     data.append("IDEUPfile.write('"+content+"')\n");
     data.append("IDEUPfile.close()\n");
+    data.append("print('EOIDEupC')");
     data.append(0x04);
     writeData(data);
     while (!toConsole) {
         QCoreApplication::processEvents();
     }
-    qDebug()<<internalData;
+    scanTargetFileSystem();
+}
+
+void Terminal::deleteTargetDir(QString dirName){
+    QByteArray data;
+    toConsole = false;
+    data.clear();
+    data.append(0x05);
+    data.append("import os\n");
+    data.append("os.rmdir('"+dirName+"')\n");
+    data.append("print('EOIDEupC')");
+    data.append(0x04);
+    writeData(data);
+    while (!toConsole) {
+        QCoreApplication::processEvents();
+    }
+    scanTargetFileSystem();
+}
+void Terminal::deleteTargetFile(QString fileName){
+    QByteArray data;
+    toConsole = false;
+    data.clear();
+    data.append(0x05);
+    data.append("import os\n");
+    data.append("os.remove('"+fileName+"')\n");
+    data.append("print('EOIDEupC')");
+    data.append(0x04);
+    writeData(data);
+    while (!toConsole) {
+        QCoreApplication::processEvents();
+    }
+    scanTargetFileSystem();
+}
+QString Terminal::get_target_current_dir(){
+    return targetCurrentDir;
 }

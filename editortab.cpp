@@ -2,6 +2,7 @@
 #include <QGridLayout>
 #include <Qsci/qscilexerpython.h>
 #include <QDebug>
+#include <QFileInfo>
 
 EditorTab::EditorTab(bool hostfile, QWidget *parent) : QWidget(parent),
     hostfile(hostfile)
@@ -38,6 +39,10 @@ EditorTab::EditorTab(QString filePath, bool hostfile, QWidget *parent) : QWidget
 
     openFile(filePath);
 }
+
+void EditorTab::set_host_file(bool host){
+    hostfile = host;
+}
 void EditorTab::openFile(QString path){
     delete mFile;
     mFile = new QFile(path);
@@ -56,7 +61,7 @@ void EditorTab::saveFile(QString path){
         mFile->write(ed->text().toLatin1());
         mFile->close();
     }else{
-        saveTargetFile(mFilePath,ed->text().toLocal8Bit());
+        saveTargetFile(path,ed->text().toLatin1());
     }
 }
 EditorTab::~EditorTab(){

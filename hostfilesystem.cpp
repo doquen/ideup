@@ -1,6 +1,8 @@
 #include "hostfilesystem.h"
 #include "ui_hostfilesystem.h"
+#include "simplefiledialog.h"
 #include <QFileSystemModel>
+#include <QKeyEvent>
 #include <QDebug>
 
 HostFileSystem::HostFileSystem(QWidget *parent) :
@@ -56,5 +58,38 @@ void HostFileSystem::on_comboBox_activated(const QString &arg1)
 }
 
 void HostFileSystem::contextMenuEvent(QContextMenuEvent *e){
+    Q_UNUSED(e);
     qDebug() <<"hola";
+}
+
+void HostFileSystem::on_pushButton_clicked()
+{
+    QString fileName;
+    SimpleFileDialog sfd(&fileName,"Nuevo Archivo");
+    if(sfd.exec()){
+        if(!QFile(fileName).exists()){
+            QFile f(fileName);
+            f.open(QIODevice::WriteOnly);
+            f.close();
+        }
+    }
+}
+
+void HostFileSystem::on_pushButton_2_clicked()
+{
+    QString dirname;
+    SimpleFileDialog sfd(&dirname,"Nueva Carpeta");
+    if(sfd.exec()){
+        if(!QDir(dirname).exists())
+            QDir().mkdir(dirname);
+    }
+}
+void HostFileSystem::keyPressEvent(QKeyEvent *e){
+    if (e->key() == Qt::Key_Delete){
+        QString file = model->filePath(ui->treeView->currentIndex());
+        if(QDir(file).exists())
+            QDir(file).removeRecursively();
+        else if (QFile(file).exists())
+            QFile(file).remove();
+    }
 }

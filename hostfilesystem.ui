@@ -14,20 +14,49 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
+   <property name="horizontalSpacing">
+    <number>0</number>
+   </property>
    <item row="0" column="0">
     <widget class="QComboBox" name="comboBox"/>
    </item>
    <item row="0" column="1">
     <widget class="QPushButton" name="pushButton_2">
+     <property name="maximumSize">
+      <size>
+       <width>30</width>
+       <height>16777215</height>
+      </size>
+     </property>
      <property name="text">
-      <string>PushButton</string>
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="resources.qrc">
+       <normaloff>:/newfolder.png</normaloff>:/newfolder.png</iconset>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
      </property>
     </widget>
    </item>
    <item row="0" column="2">
     <widget class="QPushButton" name="pushButton">
+     <property name="maximumSize">
+      <size>
+       <width>30</width>
+       <height>16777215</height>
+      </size>
+     </property>
      <property name="text">
-      <string>PushButton</string>
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="resources.qrc">
+       <normaloff>:/newfile.png</normaloff>:/newfile.png</iconset>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
      </property>
     </widget>
    </item>
@@ -49,7 +78,14 @@
     </widget>
    </item>
   </layout>
+  <zorder>pushButton_2</zorder>
+  <zorder>comboBox</zorder>
+  <zorder>pushButton</zorder>
+  <zorder>treeView</zorder>
+  <zorder>label</zorder>
  </widget>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

@@ -16,6 +16,7 @@ public:
     QString getFilePath();
     void saveFile(QString path);
     bool is_host_file();
+    void set_host_file(bool host);
 
 private:
     QString mFilePath;
