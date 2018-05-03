@@ -77,7 +77,10 @@ void MainWindow::port_connected(QString portName, bool state){
 void MainWindow::on_actionGuardar_triggered()
 {
     EditorTab *et= ed->getCurrentTab();
-    et->saveFile(QDir::cleanPath(et->getFilePath()));
+    if(et->getFilePath() != "")
+        et->saveFile(QDir::cleanPath(et->getFilePath()));
+    else
+        on_actionGuardar_Como_triggered();
 }
 
 void MainWindow::on_actionEjecutar_triggered()
@@ -112,9 +115,24 @@ void MainWindow::on_actionGuardar_Como_triggered()
     SimpleFileDialog sfd(&fileName,"Guardar Como",true);
     if(sfd.exec()){
         et->set_host_file(sfd.host_selected());
-        if (sfd.host_selected())
+        if (sfd.host_selected()){
             et->saveFile(fileName);
-        else
-            et->saveFile(term->get_target_current_dir()+"/"+fileName);
+            ed->getTabWidget()->setTabText(ed->getTabWidget()->currentIndex(),QDir().absoluteFilePath(fileName));
+        }
+        else{
+            QString path = term->get_target_current_dir();
+            path = path == "/" ? path + fileName : path + "/" + fileName;
+            ed->getTabWidget()->setTabText(ed->getTabWidget()->currentIndex(),"(target)"+path);
+            et->saveFile(path);
+        }
+    }
+}
+
+void MainWindow::on_actionArchivo_Nuevo_triggered()
+{
+    QString name;
+    SimpleFileDialog sfd(&name,"Nuevo");
+    if(sfd.exec()){
+        ed->addTab(new EditorTab(),name);
     }
 }

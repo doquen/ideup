@@ -2,6 +2,7 @@
 #include <QGridLayout>
 #include <Qsci/qscilexerpython.h>
 #include <QDebug>
+#include <QDir>
 #include <QFileInfo>
 
 EditorTab::EditorTab(bool hostfile, QWidget *parent) : QWidget(parent),
@@ -60,8 +61,10 @@ void EditorTab::saveFile(QString path){
         mFile->open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text);
         mFile->write(ed->text().toLatin1());
         mFile->close();
+        mFilePath = QDir().absoluteFilePath(path);
     }else{
         saveTargetFile(path,ed->text().toLatin1());
+        mFilePath = path;
     }
 }
 EditorTab::~EditorTab(){

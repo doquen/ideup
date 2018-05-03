@@ -31,6 +31,8 @@ private slots:
     void on_actionTransferir_triggered();
     void on_actionGuardar_Como_triggered();
 
+    void on_actionArchivo_Nuevo_triggered();
+
 signals:
     void transferFile(QString filename, QByteArray content);
 private:

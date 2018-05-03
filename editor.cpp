@@ -19,9 +19,13 @@ Editor::~Editor()
 int Editor::addTab(QWidget *widget, QString string){
     ui->tabWidget->addTab(widget,string);
     ui->tabWidget->setCurrentWidget(widget);
+    EditorTab* et = (EditorTab*)(ui->tabWidget->currentWidget());
+    connect(et,SIGNAL(saveTargetFile(QString,QByteArray)),this,SIGNAL(saveTargetFile(QString,QByteArray)));
     return 0;
 }
-
+QTabWidget *Editor::getTabWidget(){
+    return ui->tabWidget;
+}
 void Editor::openFile(QString filePath){
     addTab(new EditorTab(filePath),filePath);
     EditorTab* et = (EditorTab*)(ui->tabWidget->currentWidget());

@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QToolBar>
+#include <QTabWidget>
 #include "editortab.h"
 
 
@@ -19,6 +20,7 @@ public:
     ~Editor();
     int addTab(QWidget* widget, QString string);
     EditorTab *getCurrentTab();
+    QTabWidget *getTabWidget();
 signals:
     void saveTargetFile(QString path, QByteArray content);
 public slots:
