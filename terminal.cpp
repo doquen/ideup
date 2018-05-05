@@ -26,6 +26,7 @@ Terminal::~Terminal()
 
 void Terminal::scan_ports(){
     QList<QSerialPortInfo> *infos = new QList<QSerialPortInfo>(QSerialPortInfo::availablePorts());
+    ui->comboBox->clear();
     for(int i=0; i< infos->length(); i++){
         ui->comboBox->addItem(infos->at(i).portName());
     }
