@@ -99,7 +99,10 @@ void Console::keyPressEvent(QKeyEvent *e)
             clipboard->setText(textCursor().selectedText());
         }
         else if(e->key() == Qt::Key_L && (e->modifiers() & Qt::ControlModifier)){
+            QStringList list = toPlainText().split('\n');
+            QString last = list.at(list.length()-1);
             clear();
+            insertPlainText(last);
         }
         else{
             if (e->key()==Qt::Key_Enter || e->key() == Qt::Key_Return){
