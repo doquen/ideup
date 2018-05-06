@@ -49,9 +49,10 @@ void HostFileSystem::on_treeView_doubleClicked(const QModelIndex &index)
 void HostFileSystem::on_comboBox_activated(const QString &arg1)
 {
     QDir dir;
-    dir.setCurrent(model->rootPath());
+
     QString path = dir.cleanPath(dir.absoluteFilePath(arg1));
     model->setRootPath(path);
+    dir.setCurrent(model->rootPath());
     ui->treeView->setRootIndex(model->index(path));
     ui->label->setText(QDir::cleanPath(path));
     fillDirBox();

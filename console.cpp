@@ -1,5 +1,5 @@
 #include "console.h"
-
+#include <QtConcurrent/QtConcurrent>
 #include <QScrollBar>
 #include <QClipboard>
 #include <QKeySequence>
@@ -56,7 +56,7 @@ void Console::putData(const QByteArray &data)
             break;
         default:
             this->textCursor().deleteChar();
-            insertPlainText(QString(data.at(i)).replace('\n','\r'));
+            insertPlainText(QString(data.at(i)));
             QCoreApplication::processEvents();
         }
     }

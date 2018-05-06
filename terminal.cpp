@@ -65,22 +65,25 @@ void Terminal::on_pushButton_clicked()
     }
 
 }
+
 void Terminal::readData()
 {
-    QByteArray data;
-    data.clear();
+
     if(port->isOpen()){
-        do{
-            data.append(port->readAll());
-            QCoreApplication::processEvents();
-        }while(port->waitForReadyRead(10));
-        if(toConsole)
-            ui->textEdit->putData(data);
-        else{
-            if(data.endsWith("EOIDEupC\r\n>>> ")){
-            toConsole = true;
+        while(port->bytesAvailable()){
+            QByteArray data;
+            do{
+                data.append(port->readAll());
+                QCoreApplication::processEvents();
+            }while(port->waitForReadyRead(10));
+            if(toConsole)
+                ui->textEdit->putData(data);
+            else{
+                if(data.endsWith("EOIDEupC\r\n>>> ")){
+                    toConsole = true;
+                }
+                internalData = data;
             }
-            internalData = data;
         }
     }
 }
@@ -248,8 +251,8 @@ void Terminal::openTargetFile(QString file){
     qDebug() << internalData.indexOf("SOIDEupF");
     qDebug() << internalData.indexOf("EOIDEupF");
     internalData = internalData.mid(internalData.indexOf("SOIDEupF")+8,internalData.indexOf("EOIDEupF")-internalData.indexOf("SOIDEupF")-8);
-   // internalData.remove(internalData.indexOf("\r\n"),2);
-   // internalData.remove(internalData.indexOf("\r\n>>>"),5);
+    // internalData.remove(internalData.indexOf("\r\n"),2);
+    // internalData.remove(internalData.indexOf("\r\n>>>"),5);
     targetFileOpened(QDir::cleanPath(targetCurrentDir+"/"+file),internalData);
     toConsole=false;
     data.clear();

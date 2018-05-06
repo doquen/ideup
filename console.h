@@ -12,7 +12,6 @@ signals:
 
 public:
     explicit Console(QWidget *parent = nullptr);
-
     void putData(const QByteArray &data);
     void setLocalEchoEnabled(bool set);
 
