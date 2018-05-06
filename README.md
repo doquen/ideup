@@ -1,15 +1,25 @@
 # README #
 
-This README would normally document whatever steps are necessary to get your application up and running.
+IDEup is not even in alpha. Help needed/wanted.
 
 ### What is this repository for? ###
 
 Basic micropython IDE for ESP8266 NodeMCU board
 
 ### How do I get set up? ###
-
-import with Qt Creator and compile.
+Install Qt and Qt creator (online installed recommended).
+Instal QScintilla.
+Import with Qt Creator (New Project -> Import -> git clone) and compile.
 
 ### Who do I talk to? ###
 
 pablo7fonovich@gmail.com
+
+### Want to help? ###
+
+Tons of things to fix/do:
+1) Serial port communication is a mess, need to improve it.
+2) Add autocomplete features.
+3) Add "help" (link to micropython help, or embedd it).
+4) Create plugin system for flashing boards.
+5) Improve file handling.
