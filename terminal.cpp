@@ -75,7 +75,8 @@ void Terminal::readData()
             do{
                 data.append(port->readAll());
                 QCoreApplication::processEvents();
-            }while(port->waitForReadyRead(10));
+            }while(port->waitForReadyRead(1));
+
             if(toConsole)
                 ui->textEdit->putData(data);
             else{
@@ -112,6 +113,7 @@ void Terminal::scanTargetFileSystem(){
     QStringList dirs;
     QStringList icons;
     toConsole = false;
+    data.append("\r");
     data.append(0x05);
     data.append("import os\n");
     data.append("IDEUPdirs = os.listdir()\n");
@@ -183,6 +185,7 @@ void Terminal::chdir(QString dir){
     QByteArray data;
     toConsole = false;
     data.clear();
+    data.append("\r");
     data.append(0x05);
     data.append("import os\n");
     data.append("os.chdir('"+dir+"')\n");
@@ -198,6 +201,7 @@ QString Terminal::pwd(){
     QByteArray data;
     toConsole = false;
     data.clear();
+    data.append("\r");
     data.append(0x05);
     data.append("import os\n");
     data.append("IDEupCurrentDir = '['+ os.getcwd() +']'\n");
@@ -209,6 +213,7 @@ QString Terminal::pwd(){
     }
     toConsole=false;
     data.clear();
+    data.append("\r");
     data.append(0x05);
     data.append("print(IDEupCurrentDir)\n");
     data.append("del IDEupCurrentDir\n");
@@ -226,6 +231,7 @@ void Terminal::openTargetFile(QString file){
     QByteArray data;
     toConsole = false;
     data.clear();
+    data.append("\r");
     data.append(0x05);
     data.append("import os\n");
     data.append("IDEUPfile = open('"+file+"','r')\n");
@@ -276,6 +282,7 @@ void Terminal::saveTargetFile(QString path, QByteArray content){
     content.replace('\r',"");
     content.replace("'","\\'");
     data.clear();
+    data.append("\r");
     data.append(0x05);
     data.append("import os\n");
     data.append("IDEUPfile = open('"+path+"','w')\n");
@@ -297,6 +304,7 @@ void Terminal::createTargetDir(QString path){
     toConsole = false;
     readDelay=175;
     data.clear();
+    data.append("\r");
     data.append(0x05);
     data.append("import os\n");
     data.append("os.mkdir('"+path+"')\n");
@@ -314,6 +322,7 @@ void Terminal::transferFileToTarget(QString fileName, QByteArray content){
     QByteArray data;
     toConsole = false;
     data.clear();
+    data.append("\r");
     data.append(0x05);
     data.append("import os\n");
     data.append("IDEUPfile = open('"+fileName+"','w')\n");
@@ -332,6 +341,7 @@ void Terminal::deleteTargetDir(QString dirName){
     QByteArray data;
     toConsole = false;
     data.clear();
+    data.append("\r");
     data.append(0x05);
     data.append("import os\n");
     data.append("os.rmdir('"+dirName+"')\n");
@@ -347,6 +357,7 @@ void Terminal::deleteTargetFile(QString fileName){
     QByteArray data;
     toConsole = false;
     data.clear();
+    data.append("\r");
     data.append(0x05);
     data.append("import os\n");
     data.append("os.remove('"+fileName+"')\n");
