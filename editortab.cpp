@@ -16,6 +16,7 @@ EditorTab::EditorTab(bool hostfile, QWidget *parent) : QWidget(parent),
     ed = new QsciScintilla(this);
     ed->setLexer(new QsciLexerPython());
     ed->setAutoIndent(true);
+    ed->setMarginLineNumbers(1,true);
     gridLayout->addWidget(ed);
 
     mFile = new QFile();

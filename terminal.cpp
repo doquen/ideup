@@ -76,15 +76,18 @@ void Terminal::readData()
                 data.append(port->readAll());
                 QCoreApplication::processEvents();
             }while(port->waitForReadyRead(1));
-
             if(toConsole)
                 ui->textEdit->putData(data);
             else{
-                if(data.endsWith("EOIDEupC\r\n>>> ")){
+                auxInternalData.append(data);
+                if(auxInternalData.endsWith("EOIDEupC\r\n>>> ")){
+                    internalData = auxInternalData;
+                    auxInternalData.clear();
                     toConsole = true;
                 }
-                internalData = data;
+
             }
+            data.clear();
         }
     }
 }
@@ -130,7 +133,6 @@ void Terminal::scanTargetFileSystem(){
     while (!toConsole) {
         QCoreApplication::processEvents();
     }
-    qDebug() << internalData;
     toConsole = false;
     data.clear();
     data.append(0x05);
@@ -151,7 +153,6 @@ void Terminal::scanTargetFileSystem(){
         lastPos=internalData.indexOf("\'",lastPos+1);
         lastPos=internalData.indexOf("\'",lastPos+1);
     }
-    qDebug() << dirList;
 
     if(dirList.length()>1)
         for(int i=0; i < dirList.length(); i=i+2){
@@ -223,7 +224,6 @@ QString Terminal::pwd(){
     while (!toConsole) {
         QCoreApplication::processEvents();
     }
-    qDebug()<<internalData.mid(internalData.indexOf("[")+1,internalData.indexOf("]")-internalData.indexOf("[")-1);
     return internalData.mid(internalData.indexOf("[")+1,internalData.indexOf("]")-internalData.indexOf("[")-1);
 }
 
@@ -254,8 +254,6 @@ void Terminal::openTargetFile(QString file){
     while (!toConsole) {
         QCoreApplication::processEvents();
     }
-    qDebug() << internalData.indexOf("SOIDEupF");
-    qDebug() << internalData.indexOf("EOIDEupF");
     internalData = internalData.mid(internalData.indexOf("SOIDEupF")+8,internalData.indexOf("EOIDEupF")-internalData.indexOf("SOIDEupF")-8);
     // internalData.remove(internalData.indexOf("\r\n"),2);
     // internalData.remove(internalData.indexOf("\r\n>>>"),5);
@@ -277,7 +275,6 @@ void Terminal::saveTargetFile(QString path, QByteArray content){
     QByteArray data;
     toConsole = false;
     readDelay=1000;
-    qDebug()<<content;
     content.replace(QChar('\n'),"\\n");
     content.replace('\r',"");
     content.replace("'","\\'");

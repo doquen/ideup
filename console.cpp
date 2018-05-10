@@ -92,7 +92,6 @@ void Console::keyPressEvent(QKeyEvent *e)
             QClipboard *clipboard = QGuiApplication::clipboard();
             QString text = clipboard->text();
             ar.append(text);
-            qDebug() << ar;
         }
         else if(e->key() == Qt::Key_C && (e->modifiers() & Qt::ControlModifier) && (e->modifiers() & Qt::ShiftModifier)){
             QClipboard *clipboard = QGuiApplication::clipboard();
