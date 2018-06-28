@@ -20,6 +20,7 @@ Console::Console(QWidget *parent)
 
 void Console::putData(const QByteArray &data)
 {
+    static QByteArray *prevData;
     int aux;
     bool ok;
     char n;

@@ -1,9 +1,13 @@
 #include "editortab.h"
 #include <QGridLayout>
 #include <Qsci/qscilexerpython.h>
+#include <Qsci/qscilexerhtml.h>
+#include <Qsci/qscilexerjavascript.h>
+#include <Qsci/qsciapis.h>
 #include <QDebug>
 #include <QDir>
 #include <QFileInfo>
+
 
 EditorTab::EditorTab(bool hostfile, QWidget *parent) : QWidget(parent),
     hostfile(hostfile)
@@ -13,14 +17,38 @@ EditorTab::EditorTab(bool hostfile, QWidget *parent) : QWidget(parent),
     gridLayout->setContentsMargins(0,0,0,0);
     gridLayout->setObjectName(QStringLiteral("gridLayout"));
 
-    ed = new QsciScintilla(this);
-    ed->setLexer(new QsciLexerPython());
+    ed = new QsciScintilla();
+    QsciLexer * lexer = new QsciLexerPython();
+
     ed->setAutoIndent(true);
     ed->setMarginLineNumbers(1,true);
+    ed->setAutoCompletionCaseSensitivity(false);
+    ed->setAutoCompletionThreshold(2);
+    ed->setAutoCompletionFillupsEnabled(true);
+    ed->setAutoCompletionSource(QsciScintilla::AcsAll);
+
+//    QsciAPIs * api = new QsciAPIs(lexer);
+//    if (!api->load("microPython.api"))
+//        qDebug() << "false";
+//    api->add("asdf");
+//    api->prepare();
+
+    ed->setLexer(lexer);
+
     gridLayout->addWidget(ed);
 
     mFile = new QFile();
 
+}
+
+void EditorTab::setLexer(QString filePath){
+    if(filePath.endsWith(".py")){
+        ed->setLexer(new QsciLexerPython());
+    }
+    else if(filePath.endsWith(".html"))
+        ed->setLexer(new QsciLexerHTML());
+    else if(filePath.endsWith(".js"))
+        ed->setLexer(new QsciLexerJavaScript());
 }
 
 EditorTab::EditorTab(QString filePath, bool hostfile, QWidget *parent) : QWidget(parent),
@@ -33,7 +61,8 @@ EditorTab::EditorTab(QString filePath, bool hostfile, QWidget *parent) : QWidget
     gridLayout->setObjectName(QStringLiteral("gridLayout"));
 
     ed = new QsciScintilla(this);
-    ed->setLexer(new QsciLexerPython());
+    ed->setMarginLineNumbers(1,true);
+    setLexer(filePath);
     ed->setAutoIndent(true);
     gridLayout->addWidget(ed);
 
@@ -64,6 +93,10 @@ void EditorTab::saveFile(QString path){
         mFile->close();
         mFilePath = QDir().absoluteFilePath(path);
     }else{
+//        QByteArray lines;
+//        for (int i=0; i<ed->lines();i++)
+//            lines.append(ed->text());
+        QString a = QString(ed->text());
         saveTargetFile(path,ed->text().toLatin1());
         mFilePath = path;
     }

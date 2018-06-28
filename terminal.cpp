@@ -94,8 +94,9 @@ void Terminal::readData()
 
 void Terminal::writeData(const QByteArray &data)
 {
-    if(port->isOpen())
+    if(port->isOpen()){
         port->write(data);
+    }
 }
 
 void Terminal::on_pushButton_3_clicked()
@@ -110,11 +111,11 @@ void Terminal::on_pushButton_2_clicked()
 
 void Terminal::scanTargetFileSystem(){
     QByteArray data;
-
     int lastPos=0;
     QStringList dirList;
     QStringList dirs;
     QStringList icons;
+    cancelar();
     toConsole = false;
     data.append("\r");
     data.append(0x05);
@@ -184,6 +185,7 @@ void Terminal::targetDirChanged(QString dir){
 
 void Terminal::chdir(QString dir){
     QByteArray data;
+    cancelar();
     toConsole = false;
     data.clear();
     data.append("\r");
@@ -200,6 +202,7 @@ void Terminal::chdir(QString dir){
 
 QString Terminal::pwd(){
     QByteArray data;
+    cancelar();
     toConsole = false;
     data.clear();
     data.append("\r");
@@ -229,6 +232,7 @@ QString Terminal::pwd(){
 
 void Terminal::openTargetFile(QString file){
     QByteArray data;
+    cancelar();
     toConsole = false;
     data.clear();
     data.append("\r");
@@ -273,21 +277,45 @@ void Terminal::openTargetFile(QString file){
 
 void Terminal::saveTargetFile(QString path, QByteArray content){
     QByteArray data;
+    cancelar();
     toConsole = false;
     readDelay=1000;
+    content.replace('\\',"\\\\");
     content.replace(QChar('\n'),"\\n");
-    content.replace('\r',"");
+    content.replace(QChar('\r'),"");
     content.replace("'","\\'");
+    content.replace('"',"\\\"");
     data.clear();
     data.append("\r");
+
     data.append(0x05);
-    data.append("import os\n");
     data.append("IDEUPfile = open('"+path+"','w')\n");
-    data.append("IDEUPfile.write('"+content+"')\n");
+    data.append("IDEUPfile.write('"+content.mid(0,FILE_CHUNK_SIZE)+"')\n");
     data.append("IDEUPfile.close()\n");
+    data.append(0x04);
+
+    writeData(data);
+    QThread::msleep(TIME_TO_WRITE);
+    for (int i=FILE_CHUNK_SIZE;i<content.length();i+=FILE_CHUNK_SIZE){
+        update_file_status((int)(100.0*i/content.size()+0.5));
+        QApplication::processEvents();
+        data.clear();
+        data.append(0x05);
+        data.append("import os\n");
+        data.append("IDEUPfile = open('"+path+"','a')\n");
+        data.append("IDEUPfile.write('"+content.mid(i,FILE_CHUNK_SIZE)+"')\n");
+        data.append("IDEUPfile.close()\n");
+        data.append(0x04);
+        writeData(data);
+        QThread::msleep(TIME_TO_WRITE);
+    }
+    update_file_status(100);
+    data.clear();
+    data.append(0x05);
     data.append("print('EOIDEupC')");
     data.append(0x04);
     writeData(data);
+
     while (!toConsole) {
         QCoreApplication::processEvents();
     }
@@ -298,6 +326,7 @@ void Terminal::saveTargetFile(QString path, QByteArray content){
 
 void Terminal::createTargetDir(QString path){
     QByteArray data;
+    cancelar();
     toConsole = false;
     readDelay=175;
     data.clear();
@@ -317,6 +346,7 @@ void Terminal::createTargetDir(QString path){
 
 void Terminal::transferFileToTarget(QString fileName, QByteArray content){
     QByteArray data;
+    cancelar();
     toConsole = false;
     data.clear();
     data.append("\r");
@@ -336,6 +366,7 @@ void Terminal::transferFileToTarget(QString fileName, QByteArray content){
 
 void Terminal::deleteTargetDir(QString dirName){
     QByteArray data;
+    cancelar();
     toConsole = false;
     data.clear();
     data.append("\r");
@@ -352,6 +383,7 @@ void Terminal::deleteTargetDir(QString dirName){
 }
 void Terminal::deleteTargetFile(QString fileName){
     QByteArray data;
+    cancelar();
     toConsole = false;
     data.clear();
     data.append("\r");
@@ -368,4 +400,11 @@ void Terminal::deleteTargetFile(QString fileName){
 }
 QString Terminal::get_target_current_dir(){
     return targetCurrentDir;
+}
+
+void Terminal::cancelar(){
+    QByteArray data;
+    data.clear();
+    data.append("\u0003");
+    writeData(data);
 }

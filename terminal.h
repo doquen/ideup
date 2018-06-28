@@ -1,6 +1,9 @@
 #ifndef TERMINAL_H
 #define TERMINAL_H
 
+#define FILE_CHUNK_SIZE 10000
+#define TIME_TO_WRITE 250
+
 #include <QWidget>
 #include <QSerialPort>
 #include <QMutex>
@@ -24,6 +27,7 @@ signals:
     void update_target_dir(QString dir);
     void port_connected(bool c);
     void targetFileOpened(QString file, QString content);
+    void update_file_status(int value);
 public slots:
     void openTargetFile(QString file);
     void writeData(const QByteArray &data);
@@ -35,6 +39,7 @@ public slots:
     void deleteTargetDir(QString dirName);
     QString pwd();
 private slots:
+    void cancelar();
     void on_pushButton_clicked();
     void readData();
     void on_pushButton_3_clicked();

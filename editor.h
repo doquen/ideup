@@ -30,6 +30,7 @@ private slots:
     void on_tabWidget_tabCloseRequested(int index);
 
 private:
+    QStringList *openedFiles;
     Ui::Editor *ui;
     QString filePath;
     QFile file;

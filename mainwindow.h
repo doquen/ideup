@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QProgressBar>
 #include "editor.h"
 #include "editortab.h"
 #include "terminal.h"
@@ -22,6 +23,7 @@ public:
 
 private slots:
     void on_actionEjecutar_Resaltado_triggered();
+
     void port_connected(QString portName, bool state);
 
     void on_actionGuardar_triggered();
@@ -29,13 +31,18 @@ private slots:
     void on_actionEjecutar_triggered();
 
     void on_actionTransferir_triggered();
+
     void on_actionGuardar_Como_triggered();
 
     void on_actionArchivo_Nuevo_triggered();
 
+    void update_file_status(int value);
+
 signals:
     void transferFile(QString filename, QByteArray content);
 private:
+
+    QProgressBar *fileProgress;
     Ui::MainWindow *ui;
     Editor *ed;
     Terminal *term;

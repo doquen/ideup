@@ -3,7 +3,6 @@
 #include "simplefiledialog.h"
 #include <QDebug>
 
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -13,6 +12,10 @@ MainWindow::MainWindow(QWidget *parent) :
     term = new Terminal();
     host = new HostFileSystem();
     targ = new TargetFileSystem();
+    fileProgress = new QProgressBar();
+    fileProgress->setVisible(false);
+    ui->statusBar->addWidget(fileProgress);
+
     this->setCentralWidget(ed);
 
     setStyleSheet("QDockWidget{color: rgb(235, 235, 235);border-color:black; border-width: 2px;}"
@@ -29,9 +32,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->dockWidget_2->setWindowTitle("Archivos Placa");
     ui->dockWidget_2->setWidget(targ);
 
-
     ed->addTab(new EditorTab(),"Nuevo");
 
+    connect(term,SIGNAL(update_file_status(int)),this,SLOT(update_file_status(int)));
     connect(term,SIGNAL(connected(QString,bool)),this,SLOT(port_connected(QString,bool)));
     connect(host,SIGNAL(openFile(QString)),ed,SLOT(openFile(QString)));
     connect(term,SIGNAL(sendScannedTargetFiles(QStringList,QStringList)),targ,SLOT(addFiles(QStringList,QStringList)));
@@ -46,6 +49,16 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(targ,SIGNAL(createNewTargetDir(QString)),term,SLOT(createTargetDir(QString)));
     connect(targ,SIGNAL(deleteTargetDir(QString)),term,SLOT(deleteTargetDir(QString)));
     connect(targ,SIGNAL(deleteTargetFile(QString)),term,SLOT(deleteTargetFile(QString)));
+
+
+}
+
+void MainWindow::update_file_status(int value){
+    fileProgress->setVisible(true);
+    fileProgress->setValue(value);
+    if(fileProgress->value() >= 100)
+        fileProgress->setVisible(false);
+    QApplication::processEvents();
 }
 
 MainWindow::~MainWindow()
@@ -57,6 +70,7 @@ void MainWindow::on_actionEjecutar_Resaltado_triggered()
 {
     EditorTab *et = ed->getCurrentTab();
     QByteArray data;
+    data.append("\u0003");
     data.append(0x05);
     data.append(et->ed->selectedText().toLatin1());
     data.append(0x04);
@@ -87,6 +101,7 @@ void MainWindow::on_actionEjecutar_triggered()
 {
     EditorTab *et = ed->getCurrentTab();
     QByteArray data;
+    data.append("\u0003");
     data.append(0x05);
     data.append(et->ed->text().toLatin1());
     data.append(0x04);

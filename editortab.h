@@ -13,6 +13,7 @@ public:
     ~EditorTab();
     QsciScintilla *ed;
     void setFilePath(QString filePath);
+    void setLexer(QString filePath);
     QString getFilePath();
     void saveFile(QString path);
     bool is_host_file();
