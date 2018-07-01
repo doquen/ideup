@@ -1,8 +1,9 @@
 #ifndef TERMINAL_H
 #define TERMINAL_H
 
-#define FILE_CHUNK_SIZE 10000
-#define TIME_TO_WRITE 250
+#define WRITE_FILE_CHUNK_SIZE 1000
+#define READ_FILE_CHUNK_SIZE 1000
+#define TIME_TO_WRITE 300
 
 #include <QWidget>
 #include <QSerialPort>

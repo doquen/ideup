@@ -79,6 +79,7 @@ void Terminal::readData()
             if(toConsole)
                 ui->textEdit->putData(data);
             else{
+                qDebug() << data;
                 auxInternalData.append(data);
                 if(auxInternalData.endsWith("EOIDEupC\r\n>>> ")){
                     internalData = auxInternalData;
@@ -232,39 +233,75 @@ QString Terminal::pwd(){
 
 void Terminal::openTargetFile(QString file){
     QByteArray data;
+    QByteArray auxdata;
+    int fileSize;
+    auxdata.clear();
     cancelar();
     toConsole = false;
     data.clear();
     data.append("\r");
     data.append(0x05);
     data.append("import os\n");
+    data.append("IDEUPfileSize = os.stat('"+file+"')[6]\n");
     data.append("IDEUPfile = open('"+file+"','r')\n");
-    data.append("IDEUPcontent = IDEUPfile.read()\n");
+    data.append("IDEUPfileSize = 'IDEUPfileSize: '+ str(IDEUPfileSize) + ' bytes'\n");
+    data.append("print('EOIDEupC')");
+    data.append(0x04);
+    writeData(data);
+    while (!toConsole) {
+        QCoreApplication::processEvents();
+    }
+    toConsole = false;
+    data.clear();
+    data.append(0x05);
+    data.append("print(IDEUPfileSize)\n");
+    data.append("print('EOIDEupC')");
+    data.append(0x04);
+    writeData(data);
+    while (!toConsole) {
+        QCoreApplication::processEvents();
+    }
+    fileSize = QString(internalData.mid(internalData.indexOf("IDEUPfileSize: ")+15,
+                                        internalData.indexOf(" bytes") -
+                                        internalData.indexOf("IDEUPfileSize: ")-
+                                        15)).toInt();
+    do{
+        toConsole = false;
+        data.append(0x05);
+        data.append("IDEUPcontent = IDEUPfile.read("+QString::number(READ_FILE_CHUNK_SIZE)+")\n");
+        data.append("IDEupReadFileCommand = 'SOIDEupF'+IDEUPcontent+'EOIDEupF'\n");
+        data.append("print('EOIDEupC')");
+        data.append(0x04);
+        writeData(data);
+        while (!toConsole) {
+            QCoreApplication::processEvents();
+        }
+        toConsole=false;
+        data.clear();
+        data.append(0x05);
+        data.append("print(IDEupReadFileCommand)\n");
+        data.append("print('EOIDEupC')");
+        data.append(0x04);
+        writeData(data);
+        while (!toConsole) {
+            QCoreApplication::processEvents();
+        }
+        internalData = internalData.mid(internalData.indexOf("SOIDEupF")+8,internalData.indexOf("EOIDEupF")-internalData.indexOf("SOIDEupF")-8);
+        auxdata.append(internalData);
+
+        update_file_status((int)(100.0*auxdata.size()/fileSize+0.5));
+        QApplication::processEvents();
+
+    } while(internalData != QByteArray(""));
+    
+    update_file_status(100);
+    QApplication::processEvents();
+
+    targetFileOpened(QDir::cleanPath(targetCurrentDir+"/"+file),auxdata);
+    toConsole=false;
+    data.clear();
+    data.append(0x05);
     data.append("IDEUPfile.close()\n");
-    data.append("IDEupReadFileCommand = 'SOIDEupF'+IDEUPcontent+'EOIDEupF'\n");
-    data.append("print('EOIDEupC')");
-    data.append(0x04);
-    writeData(data);
-    while (!toConsole) {
-        QCoreApplication::processEvents();
-    }
-    toConsole=false;
-    data.clear();
-    data.append(0x05);
-    data.append("print(IDEupReadFileCommand)\n");
-    data.append("print('EOIDEupC')");
-    data.append(0x04);
-    writeData(data);
-    while (!toConsole) {
-        QCoreApplication::processEvents();
-    }
-    internalData = internalData.mid(internalData.indexOf("SOIDEupF")+8,internalData.indexOf("EOIDEupF")-internalData.indexOf("SOIDEupF")-8);
-    // internalData.remove(internalData.indexOf("\r\n"),2);
-    // internalData.remove(internalData.indexOf("\r\n>>>"),5);
-    targetFileOpened(QDir::cleanPath(targetCurrentDir+"/"+file),internalData);
-    toConsole=false;
-    data.clear();
-    data.append(0x05);
     data.append("del IDEUPfile\n");
     data.append("del IDEUPcontent\n");
     data.append("print('EOIDEupC')");
@@ -277,42 +314,60 @@ void Terminal::openTargetFile(QString file){
 
 void Terminal::saveTargetFile(QString path, QByteArray content){
     QByteArray data;
+    QByteArray contentToWrite;
     cancelar();
     toConsole = false;
     readDelay=1000;
-    content.replace('\\',"\\\\");
-    content.replace(QChar('\n'),"\\n");
-    content.replace(QChar('\r'),"");
-    content.replace("'","\\'");
-    content.replace('"',"\\\"");
+
+    contentToWrite = content.mid(0,WRITE_FILE_CHUNK_SIZE);
+    contentToWrite.replace('\\',"\\\\");
+    contentToWrite.replace(QChar('\n'),"\\n");
+    contentToWrite.replace(QChar('\r'),"");
+    contentToWrite.replace("'","\\'");
+    contentToWrite.replace('"',"\\\"");
     data.clear();
     data.append("\r");
 
     data.append(0x05);
-    data.append("IDEUPfile = open('"+path+"','w')\n");
-    data.append("IDEUPfile.write('"+content.mid(0,FILE_CHUNK_SIZE)+"')\n");
+    data.append("import os\n");
+    data.append("IDEUPfile = open('"+path+"','wb')\n");
+    data.append("IDEUPfile.write(b'"+contentToWrite+"')\n");
     data.append("IDEUPfile.close()\n");
+    data.append("print('EOIDEupC')");
     data.append(0x04);
 
     writeData(data);
-    QThread::msleep(TIME_TO_WRITE);
-    for (int i=FILE_CHUNK_SIZE;i<content.length();i+=FILE_CHUNK_SIZE){
+    while (!toConsole) {
+        QCoreApplication::processEvents();
+    }
+    toConsole = false;
+    for (int i=WRITE_FILE_CHUNK_SIZE;i<content.length();i+=WRITE_FILE_CHUNK_SIZE){
         update_file_status((int)(100.0*i/content.size()+0.5));
         QApplication::processEvents();
+        contentToWrite = content.mid(i,WRITE_FILE_CHUNK_SIZE);
+        contentToWrite.replace('\\',"\\\\");
+        contentToWrite.replace(QChar('\n'),"\\n");
+        contentToWrite.replace(QChar('\r'),"");
+        contentToWrite.replace("'","\\'");
+        contentToWrite.replace('"',"\\\"");
         data.clear();
         data.append(0x05);
-        data.append("import os\n");
-        data.append("IDEUPfile = open('"+path+"','a')\n");
-        data.append("IDEUPfile.write('"+content.mid(i,FILE_CHUNK_SIZE)+"')\n");
+        data.append("IDEUPfile = open('"+path+"','ab')\n");
+        data.append("IDEUPfile.write(b'"+contentToWrite+"')\n");
         data.append("IDEUPfile.close()\n");
+        data.append("print('EOIDEupC')");
         data.append(0x04);
         writeData(data);
-        QThread::msleep(TIME_TO_WRITE);
+        while (!toConsole) {
+            QCoreApplication::processEvents();
+        }
+        toConsole = false;
     }
     update_file_status(100);
     data.clear();
     data.append(0x05);
-    data.append("print('EOIDEupC')");
+    //data.append("del IDEUPfile\n");
+    data.append("print('EOIDEupC')\n");
     data.append(0x04);
     writeData(data);
 
