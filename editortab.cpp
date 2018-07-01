@@ -3,6 +3,7 @@
 #include <Qsci/qscilexerpython.h>
 #include <Qsci/qscilexerhtml.h>
 #include <Qsci/qscilexerjavascript.h>
+#include <QFontDatabase>
 #include <Qsci/qsciapis.h>
 #include <QDebug>
 #include <QDir>
@@ -22,10 +23,14 @@ EditorTab::EditorTab(bool hostfile, QWidget *parent) : QWidget(parent),
 
     ed->setAutoIndent(true);
     ed->setMarginLineNumbers(1,true);
+    ed->setMarginWidth(1,30);
     ed->setAutoCompletionCaseSensitivity(false);
     ed->setAutoCompletionThreshold(2);
     ed->setAutoCompletionFillupsEnabled(true);
     ed->setAutoCompletionSource(QsciScintilla::AcsAll);
+    ed->setEdgeMode(QsciScintilla::EdgeLine);
+    ed->setEdgeColumn(80);
+    ed->setEdgeColor(QColor(Qt::lightGray));
 
 //    QsciAPIs * api = new QsciAPIs(lexer);
 //    if (!api->load("microPython.api"))
@@ -33,6 +38,9 @@ EditorTab::EditorTab(bool hostfile, QWidget *parent) : QWidget(parent),
 //    api->add("asdf");
 //    api->prepare();
 
+    QFont font = QFont("Monospace",12);
+    font.setStyleHint(QFont::Monospace);
+    lexer->setFont(font);
     ed->setLexer(lexer);
 
     gridLayout->addWidget(ed);
@@ -49,6 +57,10 @@ void EditorTab::setLexer(QString filePath){
         ed->setLexer(new QsciLexerHTML());
     else if(filePath.endsWith(".js"))
         ed->setLexer(new QsciLexerJavaScript());
+
+    QFont font = QFont("Monospace",12);
+    font.setStyleHint(QFont::Monospace);
+    ed->lexer()->setFont(font);
 }
 
 EditorTab::EditorTab(QString filePath, bool hostfile, QWidget *parent) : QWidget(parent),

@@ -14,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent) :
     targ = new TargetFileSystem();
     fileProgress = new QProgressBar();
     fileProgress->setVisible(false);
-    ui->statusBar->addWidget(fileProgress);
+    ui->statusBar->addWidget(fileProgress,1);
 
     this->setCentralWidget(ed);
 

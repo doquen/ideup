@@ -27,7 +27,6 @@ void Console::putData(const QByteArray &data)
     QTextCursor cursor = textCursor();
     cursor.setPosition(pos);
     setTextCursor(cursor);
-    qDebug() << data;
     for (int i=0; i< data.length(); i++){
         switch (data.at(i)){
         case 0x08:

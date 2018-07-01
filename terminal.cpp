@@ -79,7 +79,6 @@ void Terminal::readData()
             if(toConsole)
                 ui->textEdit->putData(data);
             else{
-                qDebug() << data;
                 auxInternalData.append(data);
                 if(auxInternalData.endsWith("EOIDEupC\r\n>>> ")){
                     internalData = auxInternalData;
