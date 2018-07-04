@@ -22,6 +22,8 @@ EditorTab::EditorTab(bool hostfile, QWidget *parent) : QWidget(parent),
     QsciLexer * lexer = new QsciLexerPython();
 
     ed->setAutoIndent(true);
+    ed->setIndentationsUseTabs(false);
+    ed->setIndentationWidth(4);
     ed->setMarginLineNumbers(1,true);
     ed->setMarginWidth(1,30);
     ed->setAutoCompletionCaseSensitivity(false);
