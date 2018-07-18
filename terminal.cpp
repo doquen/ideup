@@ -48,6 +48,7 @@ void Terminal::on_pushButton_clicked()
         port->setBaudRate(ui->comboBox_2->currentText().toInt());
 
         if(port->open(QIODevice::ReadWrite)){
+            cancelar();
             connect(port,SIGNAL(readyRead()),this,SLOT(readData()),Qt::DirectConnection);
             connect(ui->textEdit,SIGNAL(getData(QByteArray)),this,SLOT(writeData(QByteArray)),Qt::DirectConnection);
             this->connected(port->portName(),true);
