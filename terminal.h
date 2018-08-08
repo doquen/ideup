@@ -9,6 +9,7 @@
 #include <QSerialPort>
 #include <QMutex>
 #include <QFileSystemModel>
+#include <QTimer>
 
 namespace Ui {
 class Terminal;
@@ -45,9 +46,12 @@ private slots:
     void readData();
     void on_pushButton_3_clicked();
     void scan_ports();
+    void open_port();
+    void close_port();
     void scanTargetFileSystem();
     void on_pushButton_2_clicked();
     void targetDirChanged(QString dir);
+    void killCom();
 
 private:
     QSerialPort *port;
@@ -55,10 +59,13 @@ private:
     Ui::Terminal *ui;
     QMutex mutex;
     bool toConsole;
+    bool kill;
+    bool idle;
     QByteArray internalData;
     QByteArray auxInternalData;
     QFileSystemModel *tfs;
     QString targetCurrentDir;
+    QTimer *toTimer;
 };
 
 #endif // TERMINAL_H

@@ -76,9 +76,10 @@ void TargetFileSystem::on_pushButton_2_clicked()
 }
 
 void TargetFileSystem::keyPressEvent(QKeyEvent *e){
-    if (e->key() == Qt::Key_Delete)
+    if (e->key() == Qt::Key_Delete){
         if(ui->listWidget->selectedItems().at(0)->data(Qt::UserRole)=="file")
             deleteTargetFile(ui->listWidget->selectedItems().at(0)->text());
-        else
+        }else{
             deleteTargetDir(ui->listWidget->selectedItems().at(0)->text());
+        }
 }

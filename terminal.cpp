@@ -15,13 +15,23 @@ Terminal::Terminal(QWidget *parent) :
     scan_ports();
     port = new QSerialPort();
     toConsole = true;
+    idle = true;
+    kill = false;
     targetCurrentDir = "/";
     readDelay = 20;
+    toTimer = new QTimer();
+    connect(toTimer,SIGNAL(timeout()),this,SLOT(killCom()));
 }
 
 Terminal::~Terminal()
 {
     delete ui;
+}
+
+void Terminal::killCom(){
+    toConsole=true;
+    cancelar();
+    qDebug() << "asdf";
 }
 
 void Terminal::scan_ports(){
@@ -31,38 +41,44 @@ void Terminal::scan_ports(){
         ui->comboBox->addItem(infos->at(i).portName());
     }
 }
+void Terminal::open_port(){
+    ui->pushButton->setText("Desconectar");
+    delete port;
+    port = new QSerialPort(ui->comboBox->currentText());
+    port->setBaudRate(ui->comboBox_2->currentText().toInt());
+
+    if(port->open(QIODevice::ReadWrite)){
+        connect(port,SIGNAL(readyRead()),this,SLOT(readData()),Qt::DirectConnection);
+        connect(ui->textEdit,SIGNAL(getData(QByteArray)),this,SLOT(writeData(QByteArray)),Qt::DirectConnection);
+        this->connected(port->portName(),true);
+        cancelar();
+        targetCurrentDir = pwd();
+        update_target_dir(targetCurrentDir);
+        scanTargetFileSystem();
+        port_connected(true);
+    }
+    else{
+        this->connected(port->portName(),false);
+        ui->pushButton->setChecked(false);
+        ui->pushButton->setText("Conectar");
+        port_connected(false);
+    }
+}
+void Terminal::close_port(){
+    ui->pushButton->setText("Conectar");
+    port->close();
+    disconnect(port,SIGNAL(readyRead()),this,SLOT(readData()));
+    disconnect(ui->textEdit,SIGNAL(getData(QByteArray)),this,SLOT(writeData(QByteArray)));
+    //update_target_dir("");
+    port_connected(false);
+}
 void Terminal::on_pushButton_clicked()
 {
     if(!ui->pushButton->isChecked()){
-        ui->pushButton->setText("Conectar");
-        port->close();
-        disconnect(port,SIGNAL(readyRead()),this,SLOT(readData()));
-        disconnect(ui->textEdit,SIGNAL(getData(QByteArray)),this,SLOT(writeData(QByteArray)));
-        //update_target_dir("");
-        port_connected(false);
+        close_port();
     }
     else{
-        ui->pushButton->setText("Desconectar");
-        delete port;
-        port = new QSerialPort(ui->comboBox->currentText());
-        port->setBaudRate(ui->comboBox_2->currentText().toInt());
-
-        if(port->open(QIODevice::ReadWrite)){
-            cancelar();
-            connect(port,SIGNAL(readyRead()),this,SLOT(readData()),Qt::DirectConnection);
-            connect(ui->textEdit,SIGNAL(getData(QByteArray)),this,SLOT(writeData(QByteArray)),Qt::DirectConnection);
-            this->connected(port->portName(),true);
-            targetCurrentDir = pwd();
-            update_target_dir(targetCurrentDir);
-            scanTargetFileSystem();
-            port_connected(true);
-        }
-        else{
-            this->connected(port->portName(),false);
-            ui->pushButton->setChecked(false);
-            ui->pushButton->setText("Conectar");
-            port_connected(false);
-        }
+        open_port();
     }
 
 }
@@ -71,17 +87,19 @@ void Terminal::readData()
 {
 
     if(port->isOpen()){
+        toTimer->stop();
         while(port->bytesAvailable()){
             QByteArray data;
             do{
                 data.append(port->readAll());
                 QCoreApplication::processEvents();
             }while(port->waitForReadyRead(1));
-            if(toConsole)
+            if(toConsole){
                 ui->textEdit->putData(data);
-            else{
+            }else{
                 auxInternalData.append(data);
                 if(auxInternalData.endsWith("EOIDEupC\r\n>>> ")){
+                    toTimer->stop();
                     internalData = auxInternalData;
                     auxInternalData.clear();
                     toConsole = true;
@@ -97,6 +115,7 @@ void Terminal::writeData(const QByteArray &data)
 {
     if(port->isOpen()){
         port->write(data);
+        toTimer->start(5000);
     }
 }
 
@@ -289,7 +308,7 @@ void Terminal::openTargetFile(QString file){
         internalData = internalData.mid(internalData.indexOf("SOIDEupF")+8,internalData.indexOf("EOIDEupF")-internalData.indexOf("SOIDEupF")-8);
         auxdata.append(internalData);
 
-        update_file_status((int)(100.0*auxdata.size()/fileSize+0.5));
+        update_file_status(static_cast<int>(100.0*auxdata.size()/fileSize+0.5));
         QApplication::processEvents();
 
     } while(internalData != QByteArray(""));
@@ -342,7 +361,7 @@ void Terminal::saveTargetFile(QString path, QByteArray content){
     }
     toConsole = false;
     for (int i=WRITE_FILE_CHUNK_SIZE;i<content.length();i+=WRITE_FILE_CHUNK_SIZE){
-        update_file_status((int)(100.0*i/content.size()+0.5));
+        update_file_status(static_cast<int>(100.0*i/content.size()+0.5));
         QApplication::processEvents();
         contentToWrite = content.mid(i,WRITE_FILE_CHUNK_SIZE);
         contentToWrite.replace('\\',"\\\\");
@@ -460,6 +479,6 @@ QString Terminal::get_target_current_dir(){
 void Terminal::cancelar(){
     QByteArray data;
     data.clear();
-    data.append("\u0003");
+    data.append(0x03);
     writeData(data);
 }

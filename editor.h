@@ -26,6 +26,9 @@ signals:
 public slots:
     void openFile(QString filePath);
     void openTargetFile(QString filePath, QString content);
+    void setCurrentTabText(QString text);
+    QString getCurrentTabText();
+    void currentTabContentChanged(bool ch);
 private slots:
     void on_tabWidget_tabCloseRequested(int index);
 

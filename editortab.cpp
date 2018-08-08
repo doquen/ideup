@@ -8,6 +8,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QFileInfo>
+#include <QTabWidget>
 
 
 EditorTab::EditorTab(bool hostfile, QWidget *parent) : QWidget(parent),
@@ -49,8 +50,14 @@ EditorTab::EditorTab(bool hostfile, QWidget *parent) : QWidget(parent),
 
     mFile = new QFile();
 
-}
+    mFileContent = "";
 
+}
+void EditorTab::set_current_content(QString content){
+    QByteArray aux;
+    aux.clear();
+    mFileContent = aux.append(content);
+}
 void EditorTab::setLexer(QString filePath){
     if(filePath.endsWith(".py")){
         ed->setLexer(new QsciLexerPython());
@@ -62,7 +69,8 @@ void EditorTab::setLexer(QString filePath){
 
     QFont font = QFont("Monospace",12);
     font.setStyleHint(QFont::Monospace);
-    ed->lexer()->setFont(font);
+    if(ed->lexer())
+        ed->lexer()->setFont(font);
 }
 
 EditorTab::EditorTab(QString filePath, bool hostfile, QWidget *parent) : QWidget(parent),
@@ -83,6 +91,12 @@ EditorTab::EditorTab(QString filePath, bool hostfile, QWidget *parent) : QWidget
     mFile = new QFile();
 
     openFile(filePath);
+    connect(ed,SIGNAL(textChanged()),this,SLOT(on_content_changed()));
+}
+
+void EditorTab::on_content_changed(){
+    QString edtxt = ed->text();
+    content_changed(ed->text()!=QString(mFileContent));
 }
 
 void EditorTab::set_host_file(bool host){
@@ -92,13 +106,14 @@ void EditorTab::openFile(QString path){
     delete mFile;
     mFile = new QFile(path);
     mFile->open(QIODevice::ReadOnly);
-
-    ed->setText(mFile->readAll());
-
+    mFileContent = mFile->readAll();
+    ed->setText(mFileContent);
     mFile->close();
 }
 
 void EditorTab::saveFile(QString path){
+    mFileContent.clear();
+    mFileContent.append(ed->text());
     if(hostfile){
         delete mFile;
         mFile = new QFile(path);
@@ -114,6 +129,7 @@ void EditorTab::saveFile(QString path){
         saveTargetFile(path,ed->text().toLatin1());
         mFilePath = path;
     }
+    on_content_changed();
 }
 EditorTab::~EditorTab(){
 }

@@ -22,7 +22,24 @@ int Editor::addTab(QWidget *widget, QString string){
     ui->tabWidget->setCurrentWidget(widget);
     EditorTab* et = dynamic_cast<EditorTab*>(ui->tabWidget->currentWidget());
     //connect(et,SIGNAL(saveTargetFile(QString,QByteArray)),this,SIGNAL(saveTargetFile(QString,QByteArray)));
+    connect(et,SIGNAL(content_changed(bool)),this,SLOT(currentTabContentChanged(bool)));
     return 0;
+}
+QString Editor::getCurrentTabText(){
+    return ui->tabWidget->tabText(ui->tabWidget->currentIndex());
+}
+void Editor::setCurrentTabText(QString text){
+    ui->tabWidget->setTabText(ui->tabWidget->currentIndex(),text);
+}
+void Editor::currentTabContentChanged(bool ch){
+    QString ctxt = getCurrentTabText();
+    if (ch){
+        if(!ctxt.endsWith("*"))
+            setCurrentTabText(ctxt+"*");
+    }else{
+        if(getCurrentTabText().endsWith("*"))
+                setCurrentTabText(ctxt.remove(ctxt.length()-1,1));
+    }
 }
 QTabWidget *Editor::getTabWidget(){
     return ui->tabWidget;
@@ -57,8 +74,11 @@ void Editor::openTargetFile(QString filePath, QString content){
         et = dynamic_cast<EditorTab*>(ui->tabWidget->currentWidget());
         connect(et,SIGNAL(saveTargetFile(QString,QByteArray)),this,SIGNAL(saveTargetFile(QString,QByteArray)));
         et->ed->setText(content);
+        et->set_current_content(content);
         et->setLexer(filePath);
         et->setFilePath(filePath);
+
+        connect(et->ed,SIGNAL(textChanged()),et,SLOT(on_content_changed()));
     }
 }
 

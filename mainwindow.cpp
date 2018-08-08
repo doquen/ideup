@@ -99,6 +99,7 @@ void MainWindow::on_actionGuardar_triggered()
 
 void MainWindow::on_actionEjecutar_triggered()
 {
+    on_actionGuardar_triggered();
     EditorTab *et = ed->getCurrentTab();
     QByteArray data;
     data.append("\u0003");

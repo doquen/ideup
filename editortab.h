@@ -17,14 +17,18 @@ public:
     QString getFilePath();
     void saveFile(QString path);
     bool is_host_file();
-    void set_host_file(bool host);
-
+    void set_host_file(bool host); 
+    void set_current_content(QString content);
+signals:
+    void content_changed(bool ch);
 private:
     QString mFilePath;
+    QByteArray mFileContent;
     bool hostfile;
     QFile *mFile;
     void openFile(QString path);
-
+private slots:
+    void on_content_changed();
 signals:
     void saveTargetFile(QString path, QByteArray content);
 public slots:
