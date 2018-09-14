@@ -21,7 +21,7 @@ int Editor::addTab(QWidget *widget, QString string){
     ui->tabWidget->addTab(widget,string);
     ui->tabWidget->setCurrentWidget(widget);
     EditorTab* et = dynamic_cast<EditorTab*>(ui->tabWidget->currentWidget());
-    //connect(et,SIGNAL(saveTargetFile(QString,QByteArray)),this,SIGNAL(saveTargetFile(QString,QByteArray)));
+    connect(et,SIGNAL(saveTargetFile(QString,QByteArray)),this,SIGNAL(saveTargetFile(QString,QByteArray)));
     connect(et,SIGNAL(content_changed(bool)),this,SLOT(currentTabContentChanged(bool)));
     return 0;
 }
@@ -56,7 +56,7 @@ void Editor::openFile(QString filePath){
     if (et->getFilePath() != filePath || !et->is_host_file()){
         addTab(new EditorTab(filePath),filePath);
         et = dynamic_cast<EditorTab*>(ui->tabWidget->currentWidget());
-        connect(et,SIGNAL(saveTargetFile(QString,QByteArray)),this,SIGNAL(saveTargetFile(QString,QByteArray)));
+        //connect(et,SIGNAL(saveTargetFile(QString,QByteArray)),this,SIGNAL(saveTargetFile(QString,QByteArray)));
     }
 }
 
@@ -72,7 +72,7 @@ void Editor::openTargetFile(QString filePath, QString content){
     if (et->getFilePath() != filePath || et->is_host_file()){
         addTab(new EditorTab(false),"(target)"+filePath);
         et = dynamic_cast<EditorTab*>(ui->tabWidget->currentWidget());
-        connect(et,SIGNAL(saveTargetFile(QString,QByteArray)),this,SIGNAL(saveTargetFile(QString,QByteArray)));
+        //connect(et,SIGNAL(saveTargetFile(QString,QByteArray)),this,SIGNAL(saveTargetFile(QString,QByteArray)));
         et->ed->setText(content);
         et->set_current_content(content);
         et->setLexer(filePath);

@@ -118,7 +118,7 @@ void EditorTab::saveFile(QString path){
         delete mFile;
         mFile = new QFile(path);
         mFile->open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text);
-        mFile->write(ed->text().toLatin1());
+        mFile->write(ed->text().toUtf8());
         mFile->close();
         mFilePath = QDir().absoluteFilePath(path);
     }else{
@@ -126,7 +126,7 @@ void EditorTab::saveFile(QString path){
 //        for (int i=0; i<ed->lines();i++)
 //            lines.append(ed->text());
         QString a = QString(ed->text());
-        saveTargetFile(path,ed->text().toLatin1());
+        saveTargetFile(path,ed->text().toUtf8());
         mFilePath = path;
     }
     on_content_changed();
