@@ -1,6 +1,7 @@
 # README #
 
 IDEup is not even in alpha. Help needed/wanted.
+If you like the app, please [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://paypal.me/PabloFonovich)
 
 ### What is this repository for? ###
 
