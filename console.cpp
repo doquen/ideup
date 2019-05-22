@@ -13,6 +13,7 @@ Console::Console(QWidget *parent)
     , localEchoEnabled(false)
 {
     pos = 0;
+    reseted = false;
     document()->setMaximumBlockCount(100);
     this->setEnabled(true);
 
@@ -33,25 +34,27 @@ void Console::putData(const QByteArray &data)
             moveCursor(QTextCursor::Left);
             break;
         case 0x1b:
-            i = i+2;
-            aux = 0;
-            ok = false;
-            n = QString(QChar(data.at(i)).toLatin1()).toInt(&ok,10);
-            while(ok){
-                aux = aux*10+n;
-                i++;
+            if ( data.length() > i+2){
+                i = i+2;
+                aux = 0;
+                ok = false;
                 n = QString(QChar(data.at(i)).toLatin1()).toInt(&ok,10);
-            }
-            switch (data.at(i)) {
-            case 0x4b:
-                moveCursor(QTextCursor::EndOfLine,QTextCursor::KeepAnchor);
-                this->textCursor().removeSelectedText();
-                break;
-            case 0x44:
-                QTextCursor cursor = textCursor();
-                cursor.movePosition(QTextCursor::Left,QTextCursor::MoveAnchor,aux);
-                setTextCursor(cursor);
-                break;
+                while(ok){
+                    aux = aux*10+n;
+                    i++;
+                    n = QString(QChar(data.at(i)).toLatin1()).toInt(&ok,10);
+                }
+                switch (data.at(i)) {
+                case 0x4b:
+                    moveCursor(QTextCursor::EndOfLine,QTextCursor::KeepAnchor);
+                    this->textCursor().removeSelectedText();
+                    break;
+                case 0x44:
+                    QTextCursor cursor = textCursor();
+                    cursor.movePosition(QTextCursor::Left,QTextCursor::MoveAnchor,aux);
+                    setTextCursor(cursor);
+                    break;
+                }
             }
             break;
         default:
@@ -102,6 +105,10 @@ void Console::keyPressEvent(QKeyEvent *e)
             QString last = list.at(list.length()-1);
             clear();
             insertPlainText(last);
+        }
+        else if(e->key() == Qt::Key_D && (e->modifiers() & Qt::ControlModifier)){
+            reseted = true;
+            ar.append(e->text().toLatin1());
         }
         else{
             if (e->key()==Qt::Key_Enter || e->key() == Qt::Key_Return){

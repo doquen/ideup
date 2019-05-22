@@ -50,6 +50,7 @@ void Terminal::open_port(){
     if(port->open(QIODevice::ReadWrite)){
         connect(port,SIGNAL(readyRead()),this,SLOT(readData()),Qt::DirectConnection);
         connect(ui->textEdit,SIGNAL(getData(QByteArray)),this,SLOT(writeData(QByteArray)),Qt::DirectConnection);
+        connect(ui->textEdit,SIGNAL(reset()),this,SLOT(pwd()));
         this->connected(port->portName(),true);
         cancelar();
         targetCurrentDir = pwd();
@@ -106,7 +107,16 @@ void Terminal::readData()
                 }
 
             }
+            qDebug() << data;
             data.clear();
+        }
+        if (ui->textEdit->reseted){
+            qDebug("reset");
+
+            ui->textEdit->reseted = false;
+            close_port();
+            open_port();
+
         }
     }
 }

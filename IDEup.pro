@@ -56,3 +56,4 @@ RESOURCES += \
 
 DISTFILES += \
     microPython.api
+

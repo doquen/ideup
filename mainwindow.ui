@@ -13,6 +13,20 @@
   <property name="windowTitle">
    <string>IDEup</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">QDockWidget{
+	color: rgb(235, 235, 235);
+    border: 1px solid black;
+    titlebar-close-icon: url(close.png);
+    titlebar-normal-icon: url(undock.png);
+}
+QDockWidget::title{
+	background: rgb(40%, 40%, 50%);
+	border-radius:4px;
+	margin:2px;
+	padding:3px
+}</string>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
@@ -26,7 +40,7 @@
      <x>0</x>
      <y>0</y>
      <width>606</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>

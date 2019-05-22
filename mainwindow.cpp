@@ -18,8 +18,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     this->setCentralWidget(ed);
 
-    setStyleSheet("QDockWidget{color: rgb(235, 235, 235);border-color:black; border-width: 2px;}"
-                  "QDockWidget::title{ background: rgb(40%, 40%, 50%); border-radius:4px;}");
     ui->dockWidget_5->setFeatures(QDockWidget::DockWidgetMovable);
     ui->dockWidget_5->setWindowTitle("Terminal");
     ui->dockWidget_5->setWidget(term);

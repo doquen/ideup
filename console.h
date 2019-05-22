@@ -9,11 +9,13 @@ class Console : public QTextEdit
 
 signals:
     void getData(const QByteArray &data);
+    void reset();
 
 public:
     explicit Console(QWidget *parent = nullptr);
     void putData(const QByteArray &data);
     void setLocalEchoEnabled(bool set);
+    bool reseted;
 
 protected:
     void keyPressEvent(QKeyEvent *e) Q_DECL_OVERRIDE;
