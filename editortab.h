@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <Qsci/qsciscintilla.h>
+#include <QFile>
 
 class EditorTab : public QWidget
 {
